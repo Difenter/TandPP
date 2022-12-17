@@ -1,6 +1,8 @@
 package data.dao.impl.mysql
 
 import data.dao.ClientsDao
+import data.dao.observable.ObservableDao
+import data.dao.observable.Observer
 import data.utils.DBConnector
 import data.utils.DBService
 import data.utils.mapping.toUser
@@ -13,7 +15,11 @@ import java.sql.SQLException
 
 class MySqlClientsDaoImpl(
     private val dbConnector: DBConnector
-) : ClientsDao {
+) : ClientsDao, ObservableDao<User> {
+
+    val onCreateObservers = mutableListOf<Observer<User>>()
+    val onUpdateObservers = mutableListOf<Observer<User>>()
+    val onDeleteObservers = mutableListOf<(User) -> Unit>()
 
     override suspend fun getById(clientId: Int): User? {
 
@@ -119,10 +125,6 @@ class MySqlClientsDaoImpl(
 
     override suspend fun create(item: User): Boolean {
 
-        if (item.password == null) {
-            return false
-        }
-
         var connection: Connection? = null
         var statement: PreparedStatement? = null
 
@@ -138,6 +140,10 @@ class MySqlClientsDaoImpl(
                 setString(4, item.password)
                 setString(5, item.phoneNumber)
                 setString(6, item.email)
+            }
+
+            onCreateObservers.forEach {
+                it.notifyOnEventHappened(item)
             }
 
             return statement?.executeUpdate() == 1
@@ -176,6 +182,10 @@ class MySqlClientsDaoImpl(
                 setInt(7, item.id)
             }
 
+            onUpdateObservers.forEach {
+                it.notifyOnEventHappened(item)
+            }
+
             return statement?.executeUpdate() == 1
 
         } catch (e: SQLException) {
@@ -199,6 +209,10 @@ class MySqlClientsDaoImpl(
             statement = connection?.prepareStatement(ClientsTable.DELETE)
             statement?.setInt(1, item.id)
 
+            onDeleteObservers.forEach {
+                it(item)
+            }
+
             return statement?.executeUpdate() == 1
 
         } catch (e: SQLException) {
@@ -209,5 +223,17 @@ class MySqlClientsDaoImpl(
         }
 
         return false
+    }
+
+    override fun addOnCreateListener(listener: Observer<User>) {
+        onCreateObservers.add(listener)
+    }
+
+    override fun addOnUpdateListener(listener: Observer<User>) {
+        onUpdateObservers.add(listener)
+    }
+
+    override fun addOnDeleteListener(listener: (User) -> Unit) {
+        onDeleteObservers.add(listener)
     }
 }
