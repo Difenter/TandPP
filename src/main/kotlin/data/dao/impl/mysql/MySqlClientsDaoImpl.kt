@@ -8,6 +8,7 @@ import data.utils.DBService
 import data.utils.mapping.toUser
 import data.utils.tables.ClientsTable
 import domain.entity.users.User
+import domain.entity.users.UserRole
 import java.sql.Connection
 import java.sql.PreparedStatement
 import java.sql.ResultSet
@@ -140,6 +141,7 @@ class MySqlClientsDaoImpl(
                 setString(4, item.password)
                 setString(5, item.phoneNumber)
                 setString(6, item.email)
+                setInt(7, getRoleId(item.userRole))
             }
 
             onCreateObservers.forEach {
@@ -179,7 +181,8 @@ class MySqlClientsDaoImpl(
                 setString(4, item.password)
                 setString(5, item.phoneNumber)
                 setString(6, item.email)
-                setInt(7, item.id)
+                setInt(7, getRoleId(item.userRole))
+                setInt(8, item.id)
             }
 
             onUpdateObservers.forEach {
@@ -196,6 +199,11 @@ class MySqlClientsDaoImpl(
         }
 
         return false
+    }
+
+    private fun getRoleId(role: UserRole) = when (role) {
+        UserRole.ADMIN -> 1
+        UserRole.USER -> 2
     }
 
     override suspend fun delete(item: User): Boolean {

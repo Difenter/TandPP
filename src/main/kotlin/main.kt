@@ -1,47 +1,45 @@
-import data.dao.impl.mysql.MySqlClientsDaoImpl
-import data.factory.impl.*
+import data.proxy.MySqlClientsProtectionProxy
 import domain.entity.users.User
-import domain.memento.ClientStateHolder
+import domain.entity.users.UserRole
 
 suspend fun main() {
 
-    val clientsDao = MySqlClientsDaoFactory().create() as MySqlClientsDaoImpl
-    val clientStateHolder = ClientStateHolder(clientsDao)
+    val clientsProxy = MySqlClientsProtectionProxy()
 
     val user = User(
         id = 1,
-        name = "name",
-        surname = "surname",
+        name = "user name",
+        surname = "user surname",
         login = "login",
         password = "12345678",
         phoneNumber = "0996661313",
-        email = "email"
+        email = "email",
+        userRole = UserRole.USER
     )
 
-    clientStateHolder.run {
+    val admin = User(
+        id = 2,
+        name = "admin name",
+        surname = "admin surname",
+        login = "login2",
+        password = "12345678",
+        phoneNumber = "0996661313",
+        email = "email",
+        userRole = UserRole.ADMIN
+    )
+
+    clientsProxy.run {
         create(user)
-        val updatedUser = user.copy(name = "new name")
-        update(updatedUser)
-        println(clientStateHolder.getCurrentState())
-        clientStateHolder.revert()
-        println(clientStateHolder.getCurrentState())
-        update(updatedUser)
+        create(admin)
+        println(getById(1))
+        println(getById(2))
         try {
-            create(user)
+            update(user.copy(name = "new user name"))
         } catch (e: Exception) {
             e.printStackTrace()
         }
-        delete(updatedUser)
-        try {
-            update(user)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-        revert()
-        applyChanges()
-        println(clientsDao.getById(updatedUser.id))
-        delete(updatedUser)
-        applyChanges()
-        println(clientsDao.getById(updatedUser.id))
+        update(admin.copy(name = "new admin name"))
+        println(getById(1))
+        println(getById(2))
     }
 }

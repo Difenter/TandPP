@@ -14,10 +14,10 @@ object ClientsTable {
     const val GET_BY_LOGIN = "select * from client where login = ?"
 
     @Language("sql")
-    const val SAVE = "insert into client (c_name, surname, login, c_password, phone_number, email) values (?, ?, ?, ?, ?, ?)"
+    const val SAVE = "insert into client (c_name, surname, login, c_password, phone_number, email, user_role) values (?, ?, ?, ?, ?, ?, ?)"
 
     @Language("sql")
-    const val UPDATE = "update client set c_name = ?, surname = ?, login = ?, c_password = ?, phone_number = ?, email = ? where id = ?"
+    const val UPDATE = "update client set c_name = ?, surname = ?, login = ?, c_password = ?, phone_number = ?, email = ?, user_role = ? where id = ?"
 
     @Language("sql")
     const val DELETE = "delete from client where id = ?"
