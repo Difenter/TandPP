@@ -16,11 +16,11 @@ suspend fun main() {
 
 
     /*
-    You,Oleksandr Volodymyrovych, can see how named arguments works in Kotlin.
-    We have to declare default values for some arguments,
+    You can see how named arguments works in Kotlin.
+    We can declare default values for some arguments,
     and specify argument name when instantiating an object.
     Or we can just use `apply` function.
-    That's why we don't need Builder pattern in Kotlin
+    That's why we don't need Builder pattern in Kotlin! ;)
      */
 
     trainersDao.run {
